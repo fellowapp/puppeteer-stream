@@ -10,8 +10,25 @@ import WebSocket, { WebSocketServer } from "ws";
 import { IncomingMessage } from "http";
 import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Handle cases where import.meta.url might not be a file:// URL
+let __filename: string;
+let __dirname: string;
+
+try {
+	if (import.meta.url && import.meta.url.startsWith('file://')) {
+		__filename = fileURLToPath(import.meta.url);
+		__dirname = path.dirname(__filename);
+	} else {
+		// Fallback for non-file URLs or when import.meta.url is not available
+		// This should point to the directory containing the compiled JS file
+		__dirname = path.dirname(new URL(import.meta.url || 'file:///dist/PuppeteerStream.js').pathname);
+		__filename = path.join(__dirname, 'PuppeteerStream.js');
+	}
+} catch (error) {
+	// Final fallback - assume we're in a dist directory
+	__dirname = path.resolve(process.cwd(), 'dist');
+	__filename = path.join(__dirname, 'PuppeteerStream.js');
+}
 
 const extensionId = "jjndjgheafjngoipoacpjgeicjeomjli";
 let currentIndex = 0;
