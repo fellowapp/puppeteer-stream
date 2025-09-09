@@ -123,5 +123,35 @@ const STOP_RECORDING = async (index: number) => {
 	recorders[index].stop();
 };
 
+const PAUSE_RECORDING = async (index: number) => {
+	console.log("[PUPPETEER_STREAM] PAUSE_RECORDING", index);
+	if (!recorders[index]) return;
+	if (recorders[index].state === "inactive") return;
+
+	const recorder = recorders[index];
+
+	const [videoTrack] = recorder.stream.getVideoTracks();
+    videoTrack.enabled = false;
+
+	const [audioTrack] = recorder.stream.getAudioTracks();
+	audioTrack.enabled = false;
+};
+
+const RESUME_RECORDING = async (index: number) => {
+	console.log("[PUPPETEER_STREAM] RESUME_RECORDING", index);
+	if (!recorders[index]) return;
+	if (recorders[index].state === "inactive") return;
+
+	const recorder = recorders[index];
+
+	const [videoTrack] = recorder.stream.getVideoTracks();
+	videoTrack.enabled = true;
+
+	const [audioTrack] = recorder.stream.getAudioTracks();
+	audioTrack.enabled = true;
+};
+
 globalThis.START_RECORDING = START_RECORDING;
 globalThis.STOP_RECORDING = STOP_RECORDING;
+globalThis.PAUSE_RECORDING = PAUSE_RECORDING;
+globalThis.RESUME_RECORDING = RESUME_RECORDING;
