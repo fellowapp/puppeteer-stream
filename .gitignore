@@ -111,6 +111,6 @@ typings/
 
 .DS_Store
 
-dist/
+# dist/
 
 extension/options.js
