@@ -92,10 +92,14 @@ export async function launch(
 		if (!found) opts.args.push(arg + value);
 	}
 
-	if (!Array.isArray(opts.enableExtensions)) opts.enableExtensions = [];
+	if (!opts.extensionPath) {
+		// @ts-ignore: Running this in Deno
+		opts.extensionPath = path.join(import.meta.dirname, "..", "extension");
+	}
 
-	opts.enableExtensions.push(path.join(__dirname, "..", "extension"));
-	opts.pipe = true;
+	addToArgs("--load-extension=", opts.extensionPath);
+	addToArgs("--disable-extensions-except=", opts.extensionPath);
+	addToArgs("--allowlisted-extension-id=", extensionId);
 
 	addToArgs("--autoplay-policy=no-user-gesture-required");
 	addToArgs("--auto-accept-this-tab-capture");
@@ -348,16 +352,6 @@ export async function getStream(page: Page, opts: getStreamOptions) {
 	await lock();
 	await page.bringToFront();
 	await assertExtensionLoaded(extension, retryPolicy);
-
-	// Invoke extension via keyboard command to grant activeTab (Ctrl/Command+Shift+Y)
-	const isMac = process.platform === 'darwin';
-	await page.keyboard.down(isMac ? 'Meta' : 'Control');
-	await page.keyboard.down('Shift');
-	await page.keyboard.press('KeyY');
-	await page.keyboard.up('Shift');
-	await page.keyboard.up(isMac ? 'Meta' : 'Control');
-	// Small delay to let Chrome register the invocation
-	await new Promise((r) => setTimeout(r, 100));
 
 	await extension.evaluate(
 		// @ts-ignore
