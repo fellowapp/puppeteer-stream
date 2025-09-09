@@ -15,6 +15,8 @@ const __dirname = path.dirname(__filename);
 
 const extensionId = "jjndjgheafjngoipoacpjgeicjeomjli";
 let currentIndex = 0;
+const pageUrlToIndex = new Map<string, number>();
+
 type StreamLaunchOptions = LaunchOptions & {
 		allowIncognito?: boolean;
 	} & {
@@ -270,6 +272,7 @@ export async function getStream(page: Page, opts: getStreamOptions) {
 
 	const highWaterMarkMB = opts.streamConfig?.highWaterMarkMB || 8;
 	const index = currentIndex++;
+	pageUrlToIndex.set(page.url(), index);
 
 	await lock();
 
@@ -357,4 +360,30 @@ async function assertExtensionLoaded(ext: Page, opt: getStreamOptions["retry"]) 
 		await wait(Math.pow(opt.each, currentTick));
 	}
 	throw new Error("Could not find START_RECORDING function in the browser context");
+}
+
+export async function pauseStream(page: Page) {
+	const index = pageUrlToIndex.get(page.url());
+	if (!index) throw new Error("Cannot find index of page");
+
+	const extension = await getExtensionPage(page.browser());
+
+	await extension.evaluate(
+		// @ts-ignore
+		(settings) => PAUSE_RECORDING(settings),
+		index,
+	);
+}
+
+export async function resumeStream(page: Page) {
+	const index = pageUrlToIndex.get(page.url());
+	if (!index) throw new Error("Cannot find index of page");
+
+	const extension = await getExtensionPage(page.browser());
+
+	await extension.evaluate(
+		// @ts-ignore
+		(settings) => RESUME_RECORDING(settings),
+		index,
+	);
 }
