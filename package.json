@@ -18,7 +18,7 @@
 	],
 	"author": "SamuelScheit",
 	"repository": {
-		"url": "https://github.com/SamuelScheit/puppeteer-stream"
+		"url": "https://github.com/fellowapp/puppeteer-stream"
 	},
 	"license": "MIT",
 	"dependencies": {
