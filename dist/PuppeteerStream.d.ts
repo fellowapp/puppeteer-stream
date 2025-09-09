@@ -69,4 +69,6 @@ export interface getStreamOptions {
 }
 export declare function getExtensionPage(browser: Browser): Promise<Page>;
 export declare function getStream(page: Page, opts: getStreamOptions): Promise<Transform>;
+export declare function pauseStream(page: Page): Promise<void>;
+export declare function resumeStream(page: Page): Promise<void>;
 export {};
