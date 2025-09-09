@@ -8,6 +8,10 @@ import * as path from "path";
 import { Transform } from "stream";
 import WebSocket, { WebSocketServer } from "ws";
 import { IncomingMessage } from "http";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const extensionId = "jjndjgheafjngoipoacpjgeicjeomjli";
 let currentIndex = 0;

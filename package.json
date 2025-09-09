@@ -2,8 +2,16 @@
 	"name": "puppeteer-stream",
 	"version": "3.0.21",
 	"description": "",
+	"type": "module",
 	"main": "dist/PuppeteerStream.js",
+	"module": "dist/PuppeteerStream.js",
 	"types": "dist/PuppeteerStream.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/PuppeteerStream.js",
+			"types": "./dist/PuppeteerStream.d.ts"
+		}
+	},
 	"scripts": {
 		"build": "tsc -p . && tsc -p extension",
 		"test": "node examples/file.js"
