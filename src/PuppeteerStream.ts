@@ -93,8 +93,8 @@ export async function launch(
 	}
 
 	if (!opts.extensionPath) {
-		// @ts-ignore: Running this in Deno
-		opts.extensionPath = path.join(import.meta.dirname, "..", "extension");
+		// Use the fallback __dirname that was calculated at the top of the file
+		opts.extensionPath = path.join(__dirname, "..", "extension");
 	}
 
 	addToArgs("--load-extension=", opts.extensionPath);
