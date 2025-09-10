@@ -16,27 +16,18 @@ let __dirname: string;
 
 try {
 	if (import.meta.url && import.meta.url.startsWith('file://')) {
-		console.log("19: import.meta.url", import.meta.url);
 		__filename = fileURLToPath(import.meta.url);
-		console.log("19: __filename", __filename);
 		__dirname = path.dirname(__filename);
-		console.log("19: __dirname", __dirname);
 	} else {
 		// Fallback for non-file URLs or when import.meta.url is not available
 		// This should point to the directory containing the compiled JS file
-		console.log("27: import.meta.url", import.meta.url);
 		__dirname = path.dirname(new URL(import.meta.url || 'file:///dist/PuppeteerStream.js').pathname);
-		console.log("27: __dirname", __dirname);
 		__filename = path.join(__dirname, 'PuppeteerStream.js');
-		console.log("27: __filename", __filename);
 	}
 } catch (error) {
 	// Final fallback - assume we're in a dist directory
-	console.log("35: process.cwd()", process.cwd());
 	__dirname = path.resolve(process.cwd(), 'dist');
-	console.log("35: __dirname", __dirname);
 	__filename = path.join(__dirname, 'PuppeteerStream.js');
-	console.log("35: __filename", __filename);
 }
 
 const extensionId = "jjndjgheafjngoipoacpjgeicjeomjli";
