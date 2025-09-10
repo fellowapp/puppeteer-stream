@@ -3,6 +3,7 @@ import {
 	LaunchOptions,
 	Browser,
 	Page,
+	PuppeteerLaunchOptions,
 } from "puppeteer-core";
 import * as path from "path";
 import { Transform } from "stream";
@@ -13,7 +14,7 @@ const extensionId = "jjndjgheafjngoipoacpjgeicjeomjli";
 let currentIndex = 0;
 const pageUrlToIndex = new Map<string, number>();
 
-type StreamLaunchOptions = LaunchOptions & {
+type StreamLaunchOptions = PuppeteerLaunchOptions & {
 		allowIncognito?: boolean;
 	} & {
 		closeDelay?: number;
@@ -71,9 +72,14 @@ export async function launch(
 		if (!found) opts.args.push(arg + value);
 	}
 
-	if (!Array.isArray(opts.enableExtensions)) opts.enableExtensions = [];
+	if (!opts.extensionPath) {
+		opts.extensionPath = path.join(__dirname, "..", "extension");
+	}
 
-	opts.enableExtensions.push(path.join(__dirname, "..", "extension"));
+	addToArgs("--load-extension=", opts.extensionPath);
+	addToArgs("--disable-extensions-except=", opts.extensionPath);
+	addToArgs("--allowlisted-extension-id=", extensionId);
+
 	opts.pipe = true;
 
 	addToArgs("--autoplay-policy=no-user-gesture-required");
@@ -327,16 +333,6 @@ export async function getStream(page: Page, opts: getStreamOptions) {
 	await lock();
 	await page.bringToFront();
 	await assertExtensionLoaded(extension, retryPolicy);
-
-	// Invoke extension via keyboard command to grant activeTab (Ctrl/Command+Shift+Y)
-	const isMac = process.platform === 'darwin';
-	await page.keyboard.down(isMac ? 'Meta' : 'Control');
-	await page.keyboard.down('Shift');
-	await page.keyboard.press('KeyY');
-	await page.keyboard.up('Shift');
-	await page.keyboard.up(isMac ? 'Meta' : 'Control');
-	// Small delay to let Chrome register the invocation
-	await new Promise((r) => setTimeout(r, 100));
 
 	await extension.evaluate(
 		// @ts-ignore
