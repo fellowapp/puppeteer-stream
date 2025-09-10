@@ -12,7 +12,7 @@ import { IncomingMessage } from "http";
 
 const extensionId = "jjndjgheafjngoipoacpjgeicjeomjli";
 let currentIndex = 0;
-const pageUrlToIndex = new Map<string, number>();
+const pageToIndex = new Map<Page, number>();
 
 type StreamLaunchOptions = PuppeteerLaunchOptions & {
 		allowIncognito?: boolean;
@@ -274,7 +274,7 @@ export async function getStream(page: Page, opts: getStreamOptions) {
 
 	const highWaterMarkMB = opts.streamConfig?.highWaterMarkMB || 8;
 	const index = currentIndex++;
-	pageUrlToIndex.set(page.url(), index);
+	pageToIndex.set(page, index);
 
 	await lock();
 
@@ -355,8 +355,8 @@ async function assertExtensionLoaded(ext: Page, opt: getStreamOptions["retry"]) 
 }
 
 export async function pauseStream(page: Page) {
-	const index = pageUrlToIndex.get(page.url());
-	if (!index) throw new Error("Cannot find index of page");
+	const index = pageToIndex.get(page);
+	if (index === undefined) throw new Error("Cannot find index of page");
 
 	const extension = await getExtensionPage(page.browser());
 
@@ -368,8 +368,8 @@ export async function pauseStream(page: Page) {
 }
 
 export async function resumeStream(page: Page) {
-	const index = pageUrlToIndex.get(page.url());
-	if (!index) throw new Error("Cannot find index of page");
+	const index = pageToIndex.get(page);
+	if (index === undefined) throw new Error("Cannot find index of page");
 
 	const extension = await getExtensionPage(page.browser());
 
