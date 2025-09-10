@@ -299,6 +299,19 @@ export async function getStream(page: Page, opts: getStreamOptions) {
 		},
 	});
 
+	// Debug stream events
+	stream.on('pause', () => {
+		console.log("[PUPPETEER_STREAM] Stream PAUSED due to backpressure");
+	});
+	
+	stream.on('resume', () => {
+		console.log("[PUPPETEER_STREAM] Stream RESUMED");
+	});
+	
+	stream.on('drain', () => {
+		console.log("[PUPPETEER_STREAM] Stream DRAINED - ready for more data");
+	});
+
 	function onConnection(ws: WebSocket, req: IncomingMessage) {
 		const url = new URL(`http://localhost:${port}${req.url}`);
 		if (url.searchParams.get("index") != index.toString()) return;
@@ -319,14 +332,30 @@ export async function getStream(page: Page, opts: getStreamOptions) {
 			(await wss).off("connection", onConnection);
 		}
 
-		ws.on("message", (data) => {
-			stream.write(data);
+	ws.on("message", (data) => {
+		const writeResult = stream.write(data);
+		const dataLength = Buffer.isBuffer(data) ? data.length : data instanceof ArrayBuffer ? data.byteLength : 0;
+		console.log("[PUPPETEER_STREAM] received buffer", {
+			dataLength: dataLength,
+			isPaused: stream.isPaused(),
+			writeResult: writeResult, // false means buffer is full
+			bufferSize: stream.readableLength,
+			highWaterMark: stream.readableHighWaterMark
 		});
+		
+		// If write returned false, the stream is experiencing backpressure
+		if (!writeResult) {
+			console.log("[PUPPETEER_STREAM] BACKPRESSURE: Stream buffer is full, waiting for drain");
+			stream.once('drain', () => {
+				console.log("[PUPPETEER_STREAM] DRAIN: Stream buffer ready for more data");
+			});
+		}
+	});
 
-		ws.on("close", close);
-		page.on("close", close);
-		stream.on("close", close);
-	}
+	ws.on("close", close);
+	page.on("close", close);
+	stream.on("close", close);
+}
 
 	(await wss).on("connection", onConnection);
 
@@ -350,6 +379,8 @@ export async function getStream(page: Page, opts: getStreamOptions) {
 		{ ...opts, index, tabId: tab.id }
 	);
 	unlock();
+
+	console.log("[PUPPETEER_STREAM] Stream created and ready, isPaused:", stream.isPaused());
 
 	return stream;
 }

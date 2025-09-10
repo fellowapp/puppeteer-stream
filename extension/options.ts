@@ -63,13 +63,17 @@ const START_RECORDING = async ({
 			},
 			(stream) => {
 				if (chrome.runtime.lastError || !stream) {
+					console.log("[PUPPETEER_STREAM] capture error", chrome.runtime.lastError?.message);
 					reject(chrome.runtime.lastError?.message);
 				} else {
+					console.log("[PUPPETEER_STREAM] capture success", stream);
 					resolve(stream);
 				}
 			}
 		);
 	});
+
+	console.log("[PUPPETEER_STREAM] stream done", stream);
 
 	// somtimes needed to sync audio and video
 	if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
