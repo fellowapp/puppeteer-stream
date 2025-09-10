@@ -334,6 +334,16 @@ export async function getStream(page: Page, opts: getStreamOptions) {
 	await page.bringToFront();
 	await assertExtensionLoaded(extension, retryPolicy);
 
+	// Invoke extension via keyboard command to grant activeTab (Ctrl/Command+Shift+Y)
+	const isMac = process.platform === 'darwin';
+	await page.keyboard.down(isMac ? 'Meta' : 'Control');
+	await page.keyboard.down('Shift');
+	await page.keyboard.press('KeyY');
+	await page.keyboard.up('Shift');
+	await page.keyboard.up(isMac ? 'Meta' : 'Control');
+	// Small delay to let Chrome register the invocation
+	await new Promise((r) => setTimeout(r, 100));
+
 	await extension.evaluate(
 		// @ts-ignore
 		(settings) => START_RECORDING(settings),

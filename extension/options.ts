@@ -86,6 +86,7 @@ const START_RECORDING = async ({
 
 		const buffer = await e.data.arrayBuffer();
 
+		console.log("[PUPPETEER_STREAM] sending buffer", buffer.byteLength);
 		client.send(buffer);
 	};
 
