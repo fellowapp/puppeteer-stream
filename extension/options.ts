@@ -73,8 +73,6 @@ const START_RECORDING = async ({
 		);
 	});
 
-	console.log("[PUPPETEER_STREAM] stream done", stream);
-
 	// somtimes needed to sync audio and video
 	if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
 
@@ -90,7 +88,6 @@ const START_RECORDING = async ({
 
 		const buffer = await e.data.arrayBuffer();
 
-		console.log("[PUPPETEER_STREAM] sending buffer", buffer.byteLength);
 		client.send(buffer);
 	};
 

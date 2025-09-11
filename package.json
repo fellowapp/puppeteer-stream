@@ -1,6 +1,6 @@
 {
 	"name": "@fellow/puppeteer-stream",
-	"version": "3.0.21-fork.5",
+	"version": "3.0.21-fork.6",
 	"description": "",
 	"main": "dist/PuppeteerStream.js",
 	"types": "dist/PuppeteerStream.d.ts",
